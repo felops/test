@@ -1,11 +1,9 @@
-name: Node.js CI
 on:
   push:
     branches:
       - main
 jobs:
   deploy:
-    name: Upload to Amazon S3
     runs-on: ubuntu-latest
 
     steps:
@@ -18,11 +16,12 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
-    - name: Run build script
+    - name: Zip files
       run: |
         npm i
-        zip -r build.zip node_modules heroes
+        zip -r heroes.zip heroes
 
-    - name: Copy files to bucket with the AWS CLI
+    - name: Update lambda code
       run: |
         aws s3 cp build.zip s3://marvel
+        aws lambda update-function-code --function-name get-heroes --zip-file heroes.zip
